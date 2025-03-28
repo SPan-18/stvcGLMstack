@@ -10,9 +10,11 @@ _Bayesian Inference for Spatial-temporal Non-Gaussian Data Using Predictive Stac
 ***
 
 >[!IMPORTANT]
-> Quick start: Download and view the file 'run/vignette.html'. 
-To run example code, install `spStack` from GitHub and source the file 
-'run/vignette.Rmd'.
+> **Quick start**: Download and view the file 'run/vignette.html'. 
+To run example code, 
+1. Clone repository (see below)
+2. Open terminal and go to the directory 'run'
+3. Issue the command 'make'
 
 ***
 
