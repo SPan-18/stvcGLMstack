@@ -168,8 +168,8 @@ plot_z2_summ
 
 <div id="refs"></div>
 
-<!-- ### Session information {-} -->
+### Session information {-}
 
-<!--  ```{r} -->
-<!-- sessionInfo() -->
-<!-- ``` -->
+ ```{r}
+sessionInfo()
+```
