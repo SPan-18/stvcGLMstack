@@ -13,8 +13,8 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
 }
 
 set.seed(1726)
-n <- 400
-beta <- c(2, -0.5)
+n <- 500
+beta <- c(3, -0.5)
 p <- length(beta)
 X <- cbind(rep(1, n), sapply(1:(p - 1), function(x) rnorm(n)))
 X_tilde <- X
@@ -35,12 +35,12 @@ y <- sapply(1:n, function(x) rpois(n = 1, lambda = exp(mu[x])))
 dat <- cbind(S, Tm, X[, -1], y, z1, z2)
 names(dat) <- c("s1", "s2", "t_coords", paste("x", 1:(p - 1), sep = ""), "y",
                 "z1_true", "z2_true")
-Sigma0 <- matrix(c(2, 1, 1, 2), nrow = 2, byrow = TRUE)
+# Sigma0 <- matrix(c(2, 1, 1, 2), nrow = 2, byrow = TRUE)
 
 mod1 <- stvcGLMexact(y ~ x1 + (x1), data = dat, family = "poisson",
                      sp_coords = as.matrix(dat[, c("s1", "s2")]),
                      time_coords = as.matrix(dat[, "t_coords"]),
-                     priors = list(iw.scale = Sigma0),
+                     # priors = list(iw.scale = Sigma0),
                      cor.fn = "gneiting-decay",
                      process.type = "multivariate",
                      sptParams = list(phi_s = 2, phi_t = 2),
