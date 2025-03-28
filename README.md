@@ -9,7 +9,7 @@ _Bayesian Inference for Spatial-temporal Non-Gaussian Data Using Predictive Stac
 
 To reproduce results or to try out the example code, issue
 ```bash
-git clone https://github.com/SPan-18/spatialGLM_stacking.git
+git clone https://github.com/SPan-18/stvcGLMstack.git
 ```
 on your personal computer or, remote server to clone this repository.
 
