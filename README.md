@@ -7,6 +7,9 @@ Using Predictive Stacking".
 Soumyakanti Pan, Lu Zhang, Jonathan R. Bradley, and Sudipto Banerjee. 2024. 
 _Bayesian Inference for Spatial-temporal Non-Gaussian Data Using Predictive Stacking._ https://arxiv.org/abs/2406.04655.
 
+>[!IMPORTANT]
+> Quick start: Install `spStack` from GitHub and source the file run/vignette.Rmd
+
 To reproduce results or to try out the example code, issue
 ```bash
 git clone https://github.com/SPan-18/stvcGLMstack.git

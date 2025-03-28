@@ -12,22 +12,23 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
   
 }
 
-set.seed(1726)
+set.seed(1729)
 n <- 500
 beta <- c(5, -0.5)
 p <- length(beta)
 X <- cbind(rep(1, n), sapply(1:(p - 1), function(x) rnorm(n)))
 X_tilde <- X
-phi_s <- c(2, 3)
+phi_s <- c(4, 3)
 phi_t <- c(2, 4)
+sigmasq.z <- c(0.25, 0.5)
 S <- data.frame(s1 = runif(n, 0, 1), s2 = runif(n, 0, 1))
 Tm <- runif(n)
 dist_S <- as.matrix(dist(as.matrix(S)))
 dist_T <- as.matrix(dist(as.matrix(Tm)))
 Vz1 <- 1/(1 + phi_t[1] * dist_T^2) * exp(- (phi_s[1] * dist_S) / sqrt(1 + phi_t[1] * dist_T^2))
 Vz2 <- 1/(1 + phi_t[2] * dist_T^2) * exp(- (phi_s[2] * dist_S) / sqrt(1 + phi_t[2] * dist_T^2))
-z1 <- rmvn(1, rep(0, n), Vz1)
-z2 <- rmvn(1, rep(0, n), Vz2)
+z1 <- rmvn(1, rep(0, n), sigmasq.z[1] * Vz1)
+z2 <- rmvn(1, rep(0, n), sigmasq.z[2] * Vz2)
 muFixed <- X %*% beta
 muSpT <- X_tilde[, 1] * z1 + X_tilde[, 2] * z2
 mu <- muFixed + muSpT
@@ -42,9 +43,11 @@ mod1 <- stvcGLMexact(y ~ x1 + (x1), data = dat, family = "poisson",
                      time_coords = as.matrix(dat[, "t_coords"]),
                      # priors = list(iw.scale = Sigma0),
                      cor.fn = "gneiting-decay",
+                     boundary = 0.75,
                      process.type = "multivariate",
                      sptParams = list(phi_s = 3, phi_t = 3),
-                     n.samples = 500)
+                     n.samples = 500,
+                     loopd = TRUE, loopd.method = "cv")
 
 post_beta <- mod1$samples$beta
 print(t(apply(post_beta, 1, function(x) quantile(x, c(0.025, 0.5, 0.975)))))
@@ -104,4 +107,5 @@ plot_z2_summ <- ggplot(data = z2_combn, aes(x = z)) +
   theme(panel.background = element_blank(),
         aspect.ratio = 1)
 
-ggpubr::ggarrange(plot_z1_summ, plot_z2_summ)
+print(ggpubr::ggarrange(plot_z1_summ, plot_z2_summ))
+

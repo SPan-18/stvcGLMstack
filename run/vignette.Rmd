@@ -1,0 +1,175 @@
+---
+title: 'A quick guide into `stvcGLMstack`'
+subtitle: 'Bayesian inference for spatial-temporal non-Gaussian data using predictive stacking'
+author: "Soumyakanti Pan, e-mail: span18@ucla.edu"
+date: \today
+output: 
+  bookdown::html_document2:
+    mathjax: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    # self_contained: true
+    theme: spacelab
+    highlight: pygments
+    toc: true
+    number_sections: true
+    df_print: kable
+    citation_package: natbib
+    code_folding: show
+header-includes:
+  - \usepackage[utf8]{inputenc}
+  - \usepackage[T1]{fontenc}
+  - \usepackage{amsmath, amssymb, amsfonts, bm}
+  - \def\T{{ \top }}
+  - \newcommand{\iid}{\stackrel{\mathclap{\normalfont\tiny\mbox{iid}}}{\sim}}
+  - \newcommand{\given}{\mid}
+  - \newcommand{\biggiven}{\,\middle|\,}
+  - \newcommand{\E}{\mathbb{E}}
+  - \newcommand{\V}{\mathbb{V}}
+  - \newcommand{\defeq}{\vcentcolon=}
+  - \newcommand{\GP}{\mathrm{GP}}
+  - \newcommand{\EF}{\mathrm{EF}}
+  - \newcommand{\DY}{\mathrm{DY}}
+  - \newcommand{\CM}{\mathrm{CM}}
+  - \newcommand{\CMP}{\mathrm{CMP}}
+  - \newcommand{\GCM}{\mathrm{GCM}}
+  - \newcommand{\CMc}{\mathrm{CM_c}}
+  - \newcommand{\GCMc}{\mathrm{GCM_c}}
+  - \newcommand{\thetasp}{{\theta_{\text{sp}}}}
+  - \newcommand{\calD}{\mathcal{D}}
+  - \newcommand{\calL}{\mathcal{L}}
+  - \newcommand{\calS}{\mathcal{S}}
+  - \newcommand{\calT}{\mathcal{T}}
+bibliography: refs.bib
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA,
+                      opts.label="kill_prefix", messages = FALSE,
+                      fig.align = 'center', fig.height = 3)
+```
+
+# Introduction
+This document is a guide to the code as it appears on the GitHub repository [stvcGLMstack](https://github.com/SPan-18/stvcGLMstack) that has been developed as a supplement to the methodology appearing in @pan2024stacking.
+
+<span style="font-size:1.1em;">Soumyakanti Pan, Lu Zhang, Jonathan R. Bradley, and Sudipto Banerjee. 2024. _Bayesian Inference for Spatial-temporal Non-Gaussian Data Using Predictive Stacking._ https://arxiv.org/abs/2406.04655.</span>
+
+The code implement Bayesian predictive stacking for analyzing outcomes that arrive either as Poisson/binomial counts or binary over spatial-temporal coordinates.
+
+## Package requirements
+The functions presented here are part of the development version of the R package `spStack` ([https://github.com/SPan-18/spStack-dev](https://github.com/SPan-18/spStack-dev)).
+
+Successful installation of spStack and other functions in this repository depends on installation of the following packages - `CVXR`, `future`, `future.apply`, `ggplot2`, `MBA`, `rstudioapi`, `ggpubr`, `knitr`, `rmarkdown`, `spBayes`, `dplyr`.
+
+```{r packages, eval=TRUE}
+# Required package names
+packages <- c("CVXR", "future", "future.apply", "ggplot2", "MBA", "rstudioapi",
+              "ggpubr", "knitr", "spBayes", "dplyr", "pak")
+
+# Install packages not yet installed
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages], 
+                   repos = "http://cran.us.r-project.org")
+}
+```
+
+> **Important:** If running for the first time, install `spStack` from GitHub by running the following code chunk. For subsequent runs, this code evaluation can be turned to FALSE.
+
+```{r install spStack, eval = TRUE}
+pak::pak("SPan-18/spStack-dev")
+```
+
+## Synthetic Poisson count data
+The following script simulates a Poisson count data with sample size $n = 500$, and space-time coordinates sampled uniformly inside $[0, 1]^2 \times [0, 1]$. 
+\begin{equation}
+\begin{split}
+y(\ell_i) &\sim \mathrm{Poisson}(\exp(x(\ell_i)^\T \beta + \tilde{x}(\ell_i)^\T z(\ell_i))), \quad i = 1, \ldots, n\\
+z_j(\ell) &\overset{\text{ind}}{\sim} \GP(0, \sigma^2_{z_j} R_j(\cdot, \cdot; \thetasp_j)), \quad j = 1, \ldots, r
+\end{split}
+\end{equation}
+Here, $x(\ell)$ is $2\times 1$ consisting of an intercept and one predictor sampled from the standard normal distribution, and, the fixed effects $\beta = (5, -0.5)$. We set $\tilde{x}(\ell) = x(\ell)$, deeming all covariates to have spatially-temporally varying coefficients. Under the independent process assumption, $z_j(\ell) \sim \GP(0, \sigma^2_{z_j} R_j(\cdot, \cdot; \thetasp_j))$ for $j = 1, 2$ with $\sigma^2_{z_1} = 0.25$, $\sigma^2_{z_2} = 0.5$ and, $(\phi_{11}, \phi_{21}) = (2, 3)$ and, $(\phi_{12}, \phi_{22}) = (2, 4)$.
+
+```{r simpois, cache=TRUE, cache.path="cache/"}
+source('sim_stvcPoisson.R')
+head(dat)
+```
+The simulated data is stored in the variable `dat`.
+
+### Fitting Poisson regression using stacking
+The steps required to implement predictive stacking to fit a spatially-temporally varying coefficient Poisson regression model is as follows - 
+
+1. Create the collection of candidate models, using `candidateModels()`.
+2. Call the function `stvcGLMexact()` with `family = 'poisson'` and a keyword to specify the model for the spatial-temporal process.
+3. (optional) Recover posterior samples of marginalized hyperparameters, using `recoverGLMscale()`.
+4. Obtain posterior samples from the *stacked posterior*, using `stackedSampler()`.
+
+See example below. We fit the multivariate spatial-temporal process model for the varying coefficients.
+
+```{r fitstvc1, cache=TRUE, cache.path="cache/"}
+library(spStack)
+
+## Step 1: create a set of candidate models
+params_list <- list(phi_s = c(2, 4, 5),
+                    phi_t = c(3, 4, 6),
+                    boundary = c(0.5))
+
+mod.list <- candidateModels(params_list, "cartesian")
+class(mod.list)
+
+## Step 2: call main function for fitting all candidate models
+mod1 <- stvcGLMstack(y ~ x1 + (x1), data = dat, family = "poisson",
+                     sp_coords = as.matrix(dat[, c("s1", "s2")]),
+                     time_coords = as.matrix(dat[, "t_coords"]),
+                     cor.fn = "gneiting-decay",
+                     process.type = "multivariate",
+                     candidate.models = mod.list,
+                     loopd.controls = list(method = "CV", CV.K = 10, nMC = 500),
+                     n.samples = 1000, verbose = TRUE)
+
+class(mod1)
+
+## Step 3: Recover marginalized scale parameters
+mod1 <- recoverGLMscale(mod1) 
+
+## Step 4: Sample model parameters from the stacked posterior
+post_samps <- stackedSampler(mod1)
+```
+
+Now, `post_samps` contains samples of model parameters from the *stacked posterior*. The following figure shows the posterior samples of the spatial-temporal process associated with the varying coefficient of the predictor `x1` at the observed locations against the corresponding true values of the process with which the data was generated.
+
+```{r plotz, echo=FALSE}
+post_z <- post_samps$z
+post_z2_summ <- t(apply(post_z[n + 1:n,], 1,
+                        function(x) quantile(x, c(0.025, 0.5, 0.975))))
+z2_combn <- data.frame(z = dat$z2_true,
+                       zL = post_z2_summ[, 1],
+                       zM = post_z2_summ[, 2],
+                       zU = post_z2_summ[, 3])
+
+library(ggplot2)
+plot_z2_summ <- ggplot(data = z2_combn, aes(x = z)) +
+  geom_errorbar(aes(ymin = zL, ymax = zU),
+                width = 0.05, alpha = 0.15,
+                color = "skyblue") +
+  geom_point(aes(y = zM), size = 0.25,
+             color = "darkblue", alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0,
+              color = "red", linetype = "solid") +
+  xlab(bquote("True"~z[2])) + ylab(bquote("Posterior of"~z[2])) +
+  theme_bw() +
+  theme(panel.background = element_blank(),
+        aspect.ratio = 1)
+
+plot_z2_summ
+```
+
+
+# References {-}
+
+<div id="refs"></div>
+
+<!-- ### Session information {-} -->
+
+<!--  ```{r} -->
+<!-- sessionInfo() -->
+<!-- ``` -->
