@@ -1,4 +1,4 @@
-# Bayesian spatially-temporally varying coefficients GLMs using predictive stacking
+# Bayesian spatially-temporally varying coefficients GLM using predictive stacking
 
 This repository contains code to implement different analyses, as it appears 
 in the manuscript "Bayesian Inference for Spatial-temporal Non-Gaussian Data 
