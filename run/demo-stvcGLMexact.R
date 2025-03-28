@@ -14,7 +14,7 @@ rmvn <- function(n, mu = 0, V = matrix(1)) {
 
 set.seed(1726)
 n <- 500
-beta <- c(3, -0.5)
+beta <- c(5, -0.5)
 p <- length(beta)
 X <- cbind(rep(1, n), sapply(1:(p - 1), function(x) rnorm(n)))
 X_tilde <- X
@@ -43,7 +43,7 @@ mod1 <- stvcGLMexact(y ~ x1 + (x1), data = dat, family = "poisson",
                      # priors = list(iw.scale = Sigma0),
                      cor.fn = "gneiting-decay",
                      process.type = "multivariate",
-                     sptParams = list(phi_s = 2, phi_t = 2),
+                     sptParams = list(phi_s = 3, phi_t = 3),
                      n.samples = 500)
 
 post_beta <- mod1$samples$beta
