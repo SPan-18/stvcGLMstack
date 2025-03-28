@@ -574,7 +574,10 @@ pre code {
 <li><a href="#fitting-poisson-regression-using-stacking"><span class="toc-section-number">1.2.1</span> Fitting Poisson regression using stacking</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#references">References</a></li>
+<li><a href="#references">References</a>
+<ul>
+<li><a href="#session-information">Session information</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -601,22 +604,12 @@ pre code {
 <p><strong>Important:</strong> If running for the first time, install <code>spStack</code> from GitHub by running the following code chunk. For subsequent runs, this code evaluation can be turned to FALSE.</p>
 </blockquote>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">&quot;SPan-18/spStack-dev&quot;</span>)</span></code></pre></div>
-<pre><code>✔ Updated metadata database: 2.86 MB in 2 files.
-ℹ Updating metadata database✔ Updating metadata database ... done
+<pre><code>ℹ Loading metadata database✔ Loading metadata database ... done
  
-→ Will update 1 package.
-→ The package (0 B) is cached.
-+ spStack 1.0.1 → 1.0.1 [bld][cmp] (GitHub: e4a5cf7)
 ✔ All system requirements are already installed.
   
-ℹ No downloads are needed, 1 pkg is cached
-✔ Got spStack 1.0.1 (source) (900.47 kB)
-ℹ Packaging spStack 1.0.1
-✔ Packaged spStack 1.0.1 (773ms)
-ℹ Building spStack 1.0.1
-✔ Built spStack 1.0.1 (17.7s)
-✔ Installed spStack 1.0.1 (github::SPan-18/spStack-dev@e4a5cf7) (297ms)
-✔ 1 pkg + 46 deps: kept 22, upd 1, dld 1 (NA B) [37s]</code></pre>
+ℹ No downloads are needed
+✔ 1 pkg + 46 deps: kept 23 [5.7s]</code></pre>
 </div>
 <div id="synthetic-poisson-count-data" class="section level2" number="1.2">
 <h2><span class="header-section-number">1.2</span> Synthetic Poisson count data</h2>
@@ -774,10 +767,43 @@ STACKING WEIGHTS:
 Pan, Soumyakanti, Lu Zhang, Jonathan R. Bradley, and Sudipto Banerjee. 2024. <span>“Bayesian Inference for Spatial-Temporal Non-Gaussian Data Using Predictive Stacking.”</span> <a href="https://arxiv.org/abs/2406.04655">https://arxiv.org/abs/2406.04655</a>.
 </div>
 </div>
-<!-- ### Session information {-} -->
-<!--  ```{r} -->
-<!-- sessionInfo() -->
-<!-- ``` -->
+<div id="session-information" class="section level3 unnumbered">
+<h3>Session information</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<pre><code>R version 4.2.2 (2022-10-31)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /u/local/compilers/intel/2020.4/compilers_and_libraries_2020.4.304/linux/mkl/lib/intel64_lin/libmkl_gf_lp64.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.5.1  rmarkdown_2.27
+
+loaded via a namespace (and not attached):
+ [1] highr_0.10        bslib_0.7.0       compiler_4.2.2    pillar_1.9.0     
+ [5] jquerylib_0.1.4   tools_4.2.2       digest_0.6.35     jsonlite_1.8.8   
+ [9] evaluate_0.23     lifecycle_1.0.4   tibble_3.2.1      gtable_0.3.5     
+[13] pkgconfig_2.0.3   rlang_1.1.3       cli_3.6.2         yaml_2.3.8       
+[17] xfun_0.43         fastmap_1.1.1     withr_3.0.0       dplyr_1.1.4      
+[21] knitr_1.46        generics_0.1.3    sass_0.4.9        vctrs_0.6.5      
+[25] grid_4.2.2        tidyselect_1.2.1  glue_1.8.0        R6_2.5.1         
+[29] processx_3.8.3    fansi_1.0.6       bookdown_0.39     farver_2.1.1     
+[33] callr_3.7.5       magrittr_2.0.3    scales_1.3.0      ps_1.7.6         
+[37] htmltools_0.5.8.1 colorspace_2.1-0  labeling_0.4.3    utf8_1.2.4       
+[41] pak_0.8.0         munsell_0.5.1     cachem_1.0.8     </code></pre>
+</div>
 </div>
 
 
