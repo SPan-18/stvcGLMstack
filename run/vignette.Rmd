@@ -170,6 +170,6 @@ plot_z2_summ
 
 ### Session information {-}
 
- ```{r}
+```{r}
 sessionInfo()
 ```
